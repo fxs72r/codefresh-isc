@@ -1,0 +1,64 @@
+gitops-runtime:
+  app-proxy:
+    image:
+      pullPolicy: IfNotPresent
+      repository: docker.artifactory.sherwin.com/tag-pos/codefresh/cap-app-proxy
+      tag: 1.2608.0.5
+    image-enrichment:
+      config:
+        images:
+          gitEnrichment:
+            repository: >-
+              docker.artifactory.sherwin.com/tag-pos/codefreshplugins/argo-hub-codefresh-csdp-image-enricher-git-info
+            tag: 1.1.10.2-main
+          jiraEnrichment:
+            repository: >-
+              docker.artifactory.sherwin.com/tag-pos/codefreshplugins/argo-hub-codefresh-csdp-image-enricher-jira-info
+            tag: 1.1.10.2-main
+          reportImage:
+            repository: >-
+              docker.artifactory.sherwin.com/tag-pos/codefreshplugins/argo-hub-codefresh-csdp-report-image-info
+            tag: 1.1.10.2-main
+    initContainer:
+      image:
+        repository: docker.artifactory.sherwin.com/tag-pos/codefresh/cap-app-proxy-init
+        tag: 1.2608.0.3
+  gitops-operator:
+    image:
+      repository: >-
+        docker.artifactory.sherwin.com/tag-pos/codefresh/codefresh-gitops-operator
+      tag: v0.1.0-alpha.5.3
+  global:
+    codefresh:
+      accountId: 65b127069f9e16bffc45966e
+      userToken:
+        secretKeyRef:
+          name: codefresh-user-token
+          key: token
+    runtime:
+      ingress:
+        class: traefik
+        className: traefik
+        enabled: true
+        hosts:
+          - codefresh.lb9961-ingress.stores.sherwin.com
+        ingressUrl: https://codefresh.lb9961-ingress.stores.sherwin.com
+        protocol: https
+        skipValidation: true
+        tls:
+          - hosts:
+              - codefresh.lb9961-ingress.stores.sherwin.com
+            secretName: ingress-tls-secret
+      ingressUrl: https://codefresh.lb9961-ingress.stores.sherwin.com
+      name: codefresh
+  installer:
+    image:
+      pullPolicy: IfNotPresent
+      repository: >-
+        docker.artifactory.sherwin.com/tag-pos/codefresh/gitops-runtime-installer
+      tag: 0.4.2.3
+    skipValidation: false
+  tunnel-client:
+    image:
+      repository: docker.artifactory.sherwin.com/tag-pos/codefresh/frpc
+      tag: 2022.10.09-b0811fd.1
