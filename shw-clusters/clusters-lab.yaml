@@ -11,17 +11,17 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: 'https://github.com/fxs72r/codefresh-isc.git'
-      path: 'clusters/overlays/lab/helm'
-      targetRevision: 'HEAD'
-      helm:
-        releaseName: 'shw-cluster'
-        skipCrds: false
-        parameters:
-        - name: longhorn.ingress.host
-          value: longhorn.lb9001-ingress.stores.sherwin.com
-        valueFiles:
-        - values.yaml
+    repoURL: 'https://github.com/fxs72r/codefresh-isc.git'
+    path: 'clusters/overlays/lab/helm'
+    targetRevision: 'HEAD'
+    helm:
+      releaseName: 'shw-cluster'
+      skipCrds: false
+      parameters:
+      - name: longhorn.ingress.host
+        value: longhorn.lb9001-ingress.stores.sherwin.com
+      valueFiles:
+      - values.yaml
 #    - repoURL: 'https://github.com/sherwin-williams-co/na-pos-deploy.git'
 #      targetRevision: 'HEAD'
 #      path: 'clusters/overlays/lab/sites/{{ name }}/resources-cluster'
