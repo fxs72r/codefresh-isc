@@ -10,7 +10,7 @@ metadata:
     codefresh.io/internal: 'true'
 spec:
   project: default
-  sources:
+  source:
     repoURL: 'https://github.com/fxs72r/codefresh-isc.git'
     path: 'clusters/overlays/lab/helm'
     targetRevision: 'HEAD'
