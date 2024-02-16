@@ -1,0 +1,10 @@
+argocd/Chart.lock
+argocd/charts
+junk
+
+.DS_Store
+
+### Helm ###
+# Chart dependencies
+**/Chart.lock
+**/charts/*.tgz

@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  # k3s component namespaces
+  - namespaces.yaml
+  # argocd k3s authentication / authorization
+  - argocd/service-account.yaml
+  - argocd/cluster-role.yaml
+  - argocd/cluster-role-binding.yaml
+  # traefik - temporary hack disable CA verification, this should be done via another method (maybe kyverno?)
+  - traefik/deployment.yaml
+  # kubernetes dashboard
+  - k3s-dashboard/recommended.yaml
+  - k3s-dashboard/dashboard-user.yaml
+  - k3s-dashboard/dashboard-user-rbac.yaml
+  - k3s-dashboard/ingress.yaml

@@ -1,0 +1,49 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: kubernetes-dashboard-http
+  namespace: kubernetes-dashboard
+spec:
+  entryPoints:
+    - web
+  routes:
+  - kind: Rule
+    match: Host(`dashboard.ingress.local.sites.sherwin.com`)
+    priority: 10
+    middlewares:
+      - name: redirect-http-https
+    services:
+    - kind: Service
+      name: kubernetes-dashboard
+      port: http
+
+---
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: kubernetes-dashboard-https
+  namespace: kubernetes-dashboard
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`dashboard.ingress.local.sites.sherwin.com`)
+      priority: 10
+      services:
+        - name: kubernetes-dashboard
+          port: 443
+#          scheme: h2c
+
+---
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-http-https
+  namespace: kubernetes-dashboard
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true

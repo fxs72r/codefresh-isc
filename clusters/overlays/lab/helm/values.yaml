@@ -1,0 +1,134 @@
+
+cert-manager:
+  enabled: false
+  namespace: cert-manager
+
+# ---------------------------------------------------------
+
+coredns:
+
+  isClusterService: false
+  serviceType: LoadBalancer
+  service:
+    loadBalancerIP: 172.30.0.8
+    annotations:
+      metallb.universe.tf/allow-shared-ip: 172.30.0.8
+  readinessProbe:
+    enabled: true # if enabled, ensure that the Corefile has configured the ``ready'' plugin
+    initialDelaySeconds: 10 # default is 30 which is too long & made me think things weren't working
+  livenessProbe:
+    enabled: true # if enabled, esnure that the Corefile has configured the ``health'' plugin
+  servers: 
+    # We setup a forwarding DNS server to forward requests for which we are not the authority to upstream servers
+    - plugins: 
+        - name: forward
+          # forward names for the `.' zone (root) to upstream servers
+          parameters: ". 10.20.103.6 10.240.3.6"
+        - name: log
+        - name: errors
+        - name: chaos
+        - name: ready
+        - name: health
+      port: 53
+      zones: 
+        - zone: "."
+          use_tcp: false
+          scheme: dns://
+    # We setup a server for the site-local zone local.sites.sherwin.com 
+    # to allow DNS names for store-local services to be answered within
+    # the store. This preserves access to those services during a WAN outage
+    - plugins: 
+        - name: file
+          parameters: /etc/coredns/site-local.db
+        - name: reload
+          parameters: 10s
+        - name: log
+        - name: errors
+        - name: auto
+        - name: ready
+        - name: health
+      port: 53
+      zones: 
+        - zone: local.sites.sherwin.com.
+          use_tcp: false
+          scheme: dns://
+  zoneFiles: 
+    - contents: |-
+          $ORIGIN local.sites.sherwin.com.
+          @ 3600 IN SOA sns.dns.icann.org. noc.dns.icann.org. (
+                  2021070801 ; serial
+                  7200       ; refresh (2 hours)
+                  3600       ; retry (1 hour)
+                  1209600    ; expire (2 weeks)
+                  3600       ; minimum (1 hour)
+                  )
+          
+            3600 IN NS a.iana-servers.net.
+            3600 IN NS b.iana-servers.net.
+          ; -------------------------------------------------------
+          ; This zone is served from a coredns instance
+          ; running in the kubernetes cluster.
+          ; It comes into play when the NOTF DHCP server specifies 172.30.0.8
+          ; as the DNS server for the LAN.
+          ; This allows in-store devices to find named services
+          ; on the in-store LAN
+          ; this is especially important for kubernetes ingresses
+          ; many of which differentiate backend services by the
+          ; hostname used to connect to them  
+          ; -------------------------------------------------------
+          
+                                  IN AAAA  ::
+          ; network-reserved addresses
+          ; reserved for networking hardware
+          gateway-a               IN A     172.30.0.1
+          gateway-b               IN A     172.30.0.2
+          gateway-c               IN A     172.30.0.3
+          
+          ; other, special values
+          network                 IN A     172.30.0.0
+          netmask                 IN A     255.255.255.192
+          gateway                 IN A     172.30.0.1
+          broadcast               IN A     172.30.0.63
+          
+          ; kubernetes master nodes
+          server-a                IN A     172.30.0.4
+          server-b                IN A     172.30.0.5
+          server-c                IN A     172.30.0.6
+          
+          ; load balancer addresses 
+          *.ingress               IN A     172.30.0.7 ; L7 load balancer/ingress controller (floating metallb ip addr)
+          *.service               IN A     172.30.0.8 ; L2 load balancer
+          lb                      IN A     172.30.0.8 ; L2 load balancer
+          
+          ; current allocation used by SOURCE POS
+          primary                 IN A     172.30.0.9
+          secondary               IN A     172.30.0.10
+          
+          ; PRINTING
+          mfp-1                   IN A     172.30.0.98
+          invoice-printer-1       IN A     172.30.0.99
+          
+          ; nameserver (uses a floating IP, but always the same one)
+          ns                      IN A     172.30.0.8
+          
+          ; misc named services
+          mqtt                    IN CNAME lb-b
+          xstoredb                IN CNAME lb-b
+      domain: local.sites.sherwin.com
+      filename: site-local.db
+
+# ---------------------------------------------------------
+
+longhorn:
+  namespaceOverride: "longhorn-system"
+
+  defaultSettings:
+    backupTarget: nfs://192.168.0.250/longhorn-backups/
+    defaultDataPath: /var/lib/longhorn/
+    nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod
+
+  ingress:
+    enabled: true
+    # host: ARGOCD INJECTED VALUE
+    ingressClassName: traefik
+    tlsSecret: tls-secret # in the longhorn-system namespace \
