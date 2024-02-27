@@ -3,7 +3,7 @@ kind: Application
 metadata:
   name: shw-na-pos
   labels:
-    codefresh.io/entity: 'git-source'
+    codefresh.io/entity: git-source
     codefresh.io/internal: 'false'
   finalizers:
   - resources-finalizer.argocd.argoproj.io
@@ -14,7 +14,7 @@ spec:
     path: shw-clusters
     targetRevision: master
     directory:
-      include: '*'
+      include: ''
       exclude: ''
       recurse: true
   destination:
