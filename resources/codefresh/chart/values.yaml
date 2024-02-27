@@ -23,6 +23,21 @@ gitops-runtime:
       image:
         repository: docker.artifactory.sherwin.com/tag-pos/codefresh/cap-app-proxy-init
         tag: 1.2608.0.3
+  argo-cd:
+    repoServer:
+      volumeMounts:
+        - mountPath: /etc/ssl/certs/
+          name: sw-root-certificate
+          readOnly: true
+      volumes:
+        - configMap:
+            defaultMode: 420
+            items:
+              - key: sw-ca-root-bundle.crt
+                path: sw-ca-root-bundle.crt
+            name: sw-ca-root-bundle
+            optional: false
+          name: sw-root-certificate
   gitops-operator:
     image:
       repository: >-
