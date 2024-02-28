@@ -29,13 +29,13 @@ spec:
         value: "lb9961"
 #        value: "{{ name }}"
       valueFiles:
-        - values-poscdb.yaml
-        - values-shercolorweb.yaml
-        - values-xmobile.yaml
-        - values-formulation-service.yaml
-        - values-colorex-ifs-rsync.yaml
-        - values-transync.yaml
-        - values-colorex-color-engine.yaml
+      - values-poscdb.yaml
+      - values-shercolorweb.yaml
+      - values-xmobile.yaml
+      - values-formulation-service.yaml
+      - values-colorex-ifs-rsync.yaml
+      - values-transync.yaml
+      - values-colorex-color-engine.yaml
 #    plugin:
 #      name: argocd-vault-plugin-helm
 #      env:
