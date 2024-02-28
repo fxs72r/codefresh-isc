@@ -10,8 +10,8 @@ metadata:
     codefresh.io/internal: 'true'
 spec:
   project: default
-  source:
-    repoURL: 'https://github.com/fxs72r/codefresh-isc.git'
+  sources:
+  - repoURL: 'https://github.com/fxs72r/codefresh-isc.git'
     path: 'clusters/overlays/lab/helm'
     targetRevision: 'HEAD'
     helm:
@@ -19,18 +19,20 @@ spec:
       skipCrds: false
       parameters:
       - name: longhorn.ingress.host
-        value: longhorn.lb9001-ingress.stores.sherwin.com
+#        value: longhorn.{{ name }}-ingress.stores.sherwin.com
+        value: longhorn.lb9961-ingress.stores.sherwin.com
       valueFiles:
       - values.yaml
-#    - repoURL: 'https://github.com/sherwin-williams-co/na-pos-deploy.git'
-#      targetRevision: 'HEAD'
-#      path: 'clusters/overlays/lab/sites/{{ name }}/resources-cluster'
-#      plugin:
-#        name: argocd-vault-plugin-kustomize
+  - repoURL: 'https://github.com/fxs72r/codefresh-isc.git'
+    targetRevision: 'HEAD'
+    path: 'clusters/base/resources-cluster'
+#    path: 'clusters/overlays/lab-shercolor/sites/{{ name }}/resources-cluster'
+#    plugin:
+#      name: argocd-vault-plugin-kustomize
   destination:
 #    namespace: 'shw-cluster'
 #    server: '{{ shw.url }}'
-    namespace: codefresh
+    namespace: shw-cluster
     server: https://kubernetes.default.svc
   ignoreDifferences:
   - group: argoproj.io
