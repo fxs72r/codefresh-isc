@@ -1,0 +1,89 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+#  name: '{{ name }}-apps-{{ shw.app.name }}'
+  name: 'lb9961-apps-na-pos'
+  annotations:
+    argocd.argoproj.io/sync-wave: '100'
+  labels:
+#    app.kubernetes.io/name: '{{ name }}-apps-{{ shw.app.name }}'
+    app.kubernetes.io/name: 'lb9961-apps-na-pos'
+    codefresh.io/entity: runtime
+    codefresh.io/internal: 'true'
+spec:
+#  project: apps-lab-shercolor
+  project: default
+  sources:
+  - repoURL: 'https://github.com/fxs72r/codefresh-isc.git'
+#    path: 'apps/{{ shw.app.name }}/overlays/lab-shercolor/helm'
+    path: 'apps/na-pos/overlays/lab/helm'
+    targetRevision: 'HEAD'
+    # SHW - multiple source argocd issue temporary workaround, remove native helm integration and proxy via env variable
+    # https://github.com/argoproj/argo-cd/pull/12508
+    helm:
+      releaseName: 'na-pos'
+      skipCrds: false
+      ignoreMissingValueFiles: true
+      parameters:
+      - name: global.shwCostCenter
+        value: "lb9961"
+#        value: "{{ name }}"
+      valueFiles:
+        - values-poscdb.yaml
+        - values-shercolorweb.yaml
+        - values-xmobile.yaml
+        - values-formulation-service.yaml
+        - values-colorex-ifs-rsync.yaml
+        - values-transync.yaml
+        - values-colorex-color-engine.yaml
+#    plugin:
+#      name: argocd-vault-plugin-helm
+#      env:
+#        - name: HELM_ARGS
+#          value: --release-name --include-crds --set-string global.shwCostCenter={{ name }} -f values-poscdb.yaml -f values-shercolorweb.yaml -f values-xmobile.yaml -f values-formulation-service.yaml -f values-colorex-ifs-rsync.yaml -f values-transync.yaml -f values-colorex-color-engine.yaml
+  - repoURL: 'https://github.com/sherwin-williams-co/na-pos-deploy.git'
+    targetRevision: 'HEAD'
+    path: 'apps/na-pos/overlays/lab'
+#    path: 'apps/{{ shw.app.name }}/overlays/lab-shercolor'
+    kustomize:
+      # SHW - multiple source argocd issue temporary workaround, specify an arbitrary label
+      commonLabels:
+        shw.argo.kustomize.origin: 'true'
+  destination:
+#    namespace: '{{ shw.app.namespace }}'
+#    server: '{{ server }}'
+    namespace: shw-na-pos
+    server: https://kubernetes.default.svc
+    ignoreDifferences:
+    - group: apps
+      kind: StatefulSet
+      jqPathExpressions:
+        - '.spec.volumeClaimTemplates[]?'
+    - group: argoproj.io
+      kind: Application
+      jsonPointers:
+      - /status
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      jqPathExpressions:
+      - .spec.conversion.webhook.clientConfig.caBundle
+      - .spec.conversion.webhook.clientConfig.service.name
+      - .spec.conversion.webhook.clientConfig.service.namespace
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      jqPathExpressions:
+      - '.webhooks[]?.clientConfig.caBundle'
+      - '.webhooks[]?.client'
+    syncPolicy:
+      automated:
+        prune: true
+        selfHeal: true
+        allowEmpty: true
+      syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+      - PruneLast=true
+      - PrunePropagationPolicy=foreground
+      - RespectIgnoreDifferences=true
+      - ServerSideApply=true
+      - Validate=true

@@ -1,0 +1,109 @@
+# Default values for formulation service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+formulation-service:
+
+  appRoot: /api/formulation
+
+  replicaCount: 1
+
+  image:
+    repository: docker.artifactory.sherwin.com/sherwin-williams-co/colorex-formulation-service
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    # TODO change this to a hard version
+    tag: 1.1.0-7918984628
+
+  
+  imagePullSecrets: []
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: false
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 8081
+    nodeport:
+      enabled: false
+    annotations:
+      traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
+      traefik.ingress.kubernetes.io/service.sticky.cookie.name: INGRESSID
+
+  secret:
+    enabled: true
+
+  probes:
+    enabled: false
+
+  ingress:
+    enabled: true
+    hosts:
+    - host: formulation-service.ingress.local.sites.sherwin.com
+      paths:
+        - path: /
+          pathType: Prefix
+    - host: formulation-service.lb9961-ingress.stores.sherwin.com
+###    - host: formulation-service.^^^SHW_COST_CENTER^^^-ingress.stores.sherwin.com
+      paths:
+        - path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - formulation-service.ingress.local.sites.sherwin.com
+      - formulation-service.lb9961-ingress.stores.sherwin.com
+###      - formulation-service.^^^SHW_COST_CENTER^^^-ingress.stores.sherwin.com
+
+  resources: 
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+     limits:
+       cpu: 800m
+       memory: 1500Mi
+     requests:
+       cpu: 500m
+       memory: 1000Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  # This attribute should be used to enable all kubernetes resources needed for store usage.
+  store:
+    enabled: true
+
+  affinity: {}
+
+  env: qa
+
+  springProfilesActive: "{{ .Values.env }},postgres,store"
+
+  shercolorwebRelease: shercolorweb-lb9961-apps-na-pos
+###  shercolorwebRelease: shercolorweb-^^^SHW_COST_CENTER^^^-apps-na-pos

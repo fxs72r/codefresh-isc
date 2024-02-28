@@ -1,0 +1,13 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: default-pool
+  namespace: shw-cluster
+spec:
+  addresses:
+  - 172.30.0.7-172.30.0.8
+  serviceAllocation:
+    namespaces:
+      - kube-system
+      - shw-cluster
+      - shw-na-pos

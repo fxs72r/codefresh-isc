@@ -1,0 +1,171 @@
+shercolorweb:
+  # Default values for shercolorweb.
+  # This is a YAML-formatted file.
+  # Declare variables to be passed into your templates.
+  appRoot: /shercolorweb
+  env: dev
+  replicaCount: 1
+
+  image:
+    repository: docker.artifactory.sherwin.com/sherwin-williams-co/colorex-shercolorweb
+    pullPolicy: IfNotPresent
+    tag: 2.2.0-8005215006
+    
+  imagePullSecrets: []
+
+  ingress:
+    ingressClassName: traefik
+    enabled: true
+    namespace: shw-na-pos
+    hosts:
+    - host: shercolorweb.ingress.local.sites.sherwin.com
+      paths:
+        - path: /shercolorweb
+          pathType: Prefix
+    - host: shercolorweb.lb9961-ingress.stores.sherwin.com
+###    - host: shercolorweb.^^^SHW_COST_CENTER^^^-ingress.stores.sherwin.com
+      paths:
+        - path: /shercolorweb
+          pathType: Prefix
+    tls:
+    - hosts:
+      - shercolorweb.ingress.local.sites.sherwin.com
+      - shercolorweb.lb9961-ingress.stores.sherwin.com
+###      - shercolorweb.^^^SHW_COST_CENTER^^^-ingress.stores.sherwin.com
+      secretName: shercolorweb-tls-secrets
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: false
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  service:
+    annotations:
+      traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
+      traefik.ingress.kubernetes.io/service.sticky.cookie.name: INGRESSID
+    type: ClusterIP
+    port: 8090
+    nodeport:
+      enabled: false
+
+  local:
+    enabled: false 
+
+  secret:
+    enabled: true  
+
+  probes:
+    enabled: false    
+
+  resources: 
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    limits:
+      cpu: 1500m
+      memory: 3000Mi
+    requests:
+      cpu: 1500m
+      memory: 3000Mi
+
+  autoscaling:
+    enabled: false
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  # Conditional attribute only meant to be set via the Helm install command. 
+  # This attribute should be used to enable all kubernetes resources needed for store usage.
+  store:
+    enabled: true
+    
+  ### ONLY SET TO TRUE IF IN LAB ENVIRONMENT ###
+  isLab: true
+
+  # Values for the postgresql dependency chart
+  postgresql:
+    fullnameOverride: shercolor-postgresql
+    global:
+      imageRegistry: docker.artifactory.sherwin.com
+      storageClass: "longhorn"
+      postgresql:
+        auth:
+          database: "sherd"
+          username: "shercolor"
+          existingSecret: "shercolorweb-secret"
+          secretKeys:
+              userPasswordKey: shercolorPass
+    auth:
+      enablePostgresUser: false          
+    image:
+      registry: docker.artifactory.sherwin.com
+      tag: 14.1.0-debian-10-r9
+    primary:
+      resources:
+        requests:
+          cpu: 2
+          memory: 8Gi
+        limits:
+          cpu: 4
+          memory: 12Gi
+      service:
+        type: LoadBalancer
+        annotations: {metallb.universe.tf/allow-shared-ip: 172.30.0.8}
+        loadBalancerIP: "172.30.0.8"
+      persistence:
+        storageClass: "longhorn"
+
+
+
+  dbPostgresUrl: "jdbc:postgresql://shercolor-postgresql:5432/{{ .Values.postgresql.global.postgresql.auth.database }}"
+
+  # TODO store profile is only active to disable Vault configuration for stores, this will be removed soon
+  springProfilesActive: "{{ .Values.env }},postgres,store"
+  dbUsername: "{{ .Values.postgresql.global.postgresql.auth.username }}"
+  azureAdSecret: "<path:xstore/kv2/data/apps/na-pos/lab-showcase/colorex#azureAdSecret>"
+
+  # App config values per env
+  # These will likely be removed as we will not have different environments in the stores?
+  dev:
+    oeBaseUrl: "http://stscpw01.sherwin.com/sw/rest/SherColor"
+    sherlinkDbUrl: "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=extd-scan.sherwin.com)(PORT=1521)))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=STECOMD)))"
+    sherlinkDbUsername: "ecomm7"
+    sherlinkLoginUrl: "https://cdweb.sherwin.com/sher-link/user/login.do"
+    sherlinkDbPassword: "<path:xstore/kv2/data/apps/na-pos/lab-showcase/colorex#sherlink.db.np.password>"
+    formulationService: "<path:xstore/kv2/data/apps/na-pos/lab-showcase/colorex#formulationService>"
+  qa:
+    oeBaseUrl: "http://stscpw01.sherwin.com/sw/rest/SherColor"
+    sherlinkDbUrl: "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=extd-scan.sherwin.com)(PORT=1521)))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=STECOMQ)))"
+    sherlinkDbUsername: "ecomm7"
+    sherlinkLoginUrl: "https://wqweb1.sherwin.com/sher-link/user/login.do"
+    sherlinkDbPassword: "<path:xstore/kv2/data/apps/na-pos/lab-showcase/colorex#sherlink.db.np.password>"
+    formulationService: "<path:xstore/kv2/data/apps/na-pos/lab-showcase/colorex#formulationService>"
+  prod:
+    oeBaseUrl: "http://stscpw01.sherwin.com/sw/rest/SherColor"
+    sherlinkDbUrl: "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(FAILOVER = ON) (LOAD_BALANCE = OFF) (ADDRESS=(PROTOCOL=TCP)(HOST=stecomp_dbhost.sherwin.com)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=STECOMP_PRIM)))"
+    sherlinkDbUsername: "ecomm7"
+    sherlinkLoginUrl: "https://cdweb.sherwin.com/sher-link/user/login.do"
+    sherlinkDbPassword: "<path:xstore/kv2/data/apps/na-pos/lab-showcase/colorex#sherlink.db.prod.password>"
+    formulationService: "<path:xstore/kv2/data/apps/na-pos/lab-showcase/colorex#formulationService>"
+  postgres:
+    shercolorPass: "<path:xstore/kv2/data/apps/na-pos/lab-showcase/colorex#postgresql.password>"
+  artifactoryToken: "<path:xstore/kv2/data/apps/na-pos/lab-showcase/colorex#artifactory.token>"

@@ -1,0 +1,10 @@
+{
+  "shw": {
+    "app": {
+      "name": "na-pos",
+      "namespace": "shw-na-pos",
+      "annotations": null,
+      "labels": null
+    }
+  }
+}

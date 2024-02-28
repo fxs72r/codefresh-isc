@@ -1,0 +1,41 @@
+apiVersion: v2
+name: na-pos-app-chart
+description: TAG POS application helm charts
+
+type: application
+version: 1.0.0
+appVersion: 1.0.0
+
+dependencies:
+
+# # # shercolor # # #
+
+- name: colorex-color-engine
+  version: v1.0.2
+  repository: https://artifactory.sherwin.com/artifactory/helm-local
+
+- name: colorex-ifs-rsync
+  version: v0.1.177
+  repository: https://artifactory.sherwin.com/artifactory/helm-local
+
+- name: formulation-service
+  version: 0.1.0-7590374200
+  repository: https://artifactory.sherwin.com/artifactory/helm-local
+
+- name: shercolorweb
+  version: 0.1.0-7546150407
+  repository: https://artifactory.sherwin.com/artifactory/helm-local
+
+- name: transync
+  version: 0.1.0-7390686888
+  repository: https://artifactory.sherwin.com/artifactory/helm-local
+
+# # # xstore # # #
+
+- name: poscdb
+  version: 0.0.16
+  repository: https://artifactory.sherwin.com/artifactory/helm-local
+
+- name: xmobile
+  version: 0.0.30
+  repository: https://artifactory.sherwin.com/artifactory/helm-local

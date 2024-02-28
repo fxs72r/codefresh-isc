@@ -1,0 +1,48 @@
+
+poscdb:
+
+  # name override is required for now due to how the db k3s services are accessed
+  fullnameOverride: poscdb
+
+  service:
+    lb:
+     ip: 172.30.0.8
+     annotations:
+       metallb.universe.tf/allow-shared-ip: 172.30.0.8
+
+  image:
+    db:
+      repository: "docker.artifactory.sherwin.com/dmw/oracle/oracle_xstore_db_runtime_19.17"
+      pullPolicy: "IfNotPresent"
+      tag: "latest"
+    snapshotter:
+      # because i don't have cert-mgr in this cluster yet
+      repository: registry.ingress.local.sites.sherwin.com/tag-pos/backup-client
+
+  ingress:
+    enabled: false
+
+  probe:
+    enabled: false
+
+  resources:
+    requests:
+      memory: "8Gi"
+      cpu: "2000m"
+    limits:
+      memory: "12Gi"
+      cpu: "4000m"
+
+  pv:
+    fra: 
+      size: 30Gi
+    data: 
+      size: 15Gi
+
+  db:
+    # db schema tarball from artifactory used to instantiate the seed database for Xstore
+    downloadFile: "shw-xpos-db-0.0.152.tar.gz"
+
+  snapshotter:
+    enabled: true
+    suspend: true
