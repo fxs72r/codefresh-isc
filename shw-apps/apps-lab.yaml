@@ -30,18 +30,12 @@ spec:
 #        value: "{{ name }}"
       valueFiles:
       - values-poscdb.yaml
-      - values-shercolorweb.yaml
-      - values-xmobile.yaml
-      - values-formulation-service.yaml
-      - values-colorex-ifs-rsync.yaml
-      - values-transync.yaml
-      - values-colorex-color-engine.yaml
 #    plugin:
 #      name: argocd-vault-plugin-helm
 #      env:
 #        - name: HELM_ARGS
-#          value: --release-name --include-crds --set-string global.shwCostCenter={{ name }} -f values-poscdb.yaml -f values-shercolorweb.yaml -f values-xmobile.yaml -f values-formulation-service.yaml -f values-colorex-ifs-rsync.yaml -f values-transync.yaml -f values-colorex-color-engine.yaml
-  - repoURL: 'https://github.com/sherwin-williams-co/na-pos-deploy.git'
+#          value: --release-name --include-crds --set-string global.shwCostCenter={{ name }} -f values-poscdb.yaml
+  - repoURL: 'https://github.com/fxs72r/codefresh-isc.git'
     targetRevision: 'HEAD'
     path: 'apps/na-pos/overlays/lab'
 #    path: 'apps/{{ shw.app.name }}/overlays/lab-shercolor'
