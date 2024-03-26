@@ -15,7 +15,7 @@ spec:
   source:
     directory:
       include: >-
-        {all-runtimes-all-clusters/*.yaml,all-runtimes-all-clusters/**/*.yaml,runtimes/lb9961/*.yaml,runtimes/lb9961/**/*.yaml,control-planes/*.yaml,control-planes/**/*.yaml,lb9961/cf-gitops-runtime.yaml,lb9961/shw-na-pos.yaml,lb9961/shw-na-pos-apps.yaml}
+        {all-runtimes-all-clusters/*.yaml,all-runtimes-all-clusters/**/*.yaml,runtimes/lb9961/*.yaml,runtimes/lb9961/**/*.yaml,control-planes/*.yaml,control-planes/**/*.yaml,lb9961/cf-gitops-runtime.yaml,lb9961/shw-na-pos.yaml}
       recurse: true
     path: resources
     repoURL: https://github.com/fxs72r/codefresh-isc.git
