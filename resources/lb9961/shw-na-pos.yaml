@@ -3,14 +3,14 @@ kind: Application
 metadata:
   name: shw-na-pos
   labels:
-    codefresh.io/entity: 'git-source'
+    codefresh.io/entity: git-source
     codefresh.io/internal: 'false'
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    repoURL: https://github.com/fxs72r/codefresh-isc.git
+    repoURL: https://github.com/sherwin-williams-co/codefresh-isc.git
     path: shw-clusters
     targetRevision: master
     directory:
