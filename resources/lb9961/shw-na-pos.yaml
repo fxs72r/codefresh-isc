@@ -10,7 +10,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/sherwin-williams-co/codefresh-isc.git
+    repoURL: https://github.com/sherwin-williams-co/na-pos-codefresh-isc.git
     path: shw-clusters
     targetRevision: master
     directory:
